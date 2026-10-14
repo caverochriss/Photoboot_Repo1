@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#141514" />
+    <meta
+      name="description"
+      content="PhotoBooth: una cabina fotográfica retro para crear recuerdos únicos."
+    />
+    <title>PhotoBooth — Tu momento, en tira</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="src/main.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./index.html" aria-label="PhotoBooth, inicio">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span>PhotoBooth</span>
+        </a>
+        <div class="account-area">
+          <span class="account-label" id="account-label">Sin sesión</span>
+          <button class="account-button" id="auth-open" type="button">Entrar</button>
+          <button class="account-button" id="auth-logout" type="button" hidden>Salir</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <p class="eyebrow">STUDIO 01 · RECUERDOS EN FORMATO ANALÓGICO</p>
+          <h1 id="page-title">Tu momento,<br /><em>en tira.</em></h1>
+          <p class="hero-copy">
+            Entra en la cabina, elige tu estilo y crea una pequeña historia en
+            cuatro fotogramas.
+          </p>
+        </section>
+
+        <section class="shared-album" id="shared-album" hidden aria-labelledby="album-title">
+          <div class="album-heading">
+            <div>
+              <p class="section-kicker">PHOTOBOOTH · EN COMPAÑÍA</p>
+              <h2 id="album-title">Álbum compartido</h2>
+              <p class="album-description" id="album-description">Inicia sesión para crear o abrir un álbum con otra persona.</p>
+            </div>
+            <span class="album-presence" id="album-presence">SIN ÁLBUM</span>
+          </div>
+          <div class="album-setup" id="album-setup" hidden>
+            <label class="album-field">Nombre del álbum
+              <span class="album-input-row"><input id="album-name" type="text" maxlength="60" placeholder="Nuestros recuerdos" /><button class="button button-secondary" id="create-album" type="button">Crear álbum</button></span>
+            </label>
+            <div class="album-join">
+              <label class="album-field" for="invite-code">¿Te han invitado? Introduce el código
+                <span class="album-input-row"><input id="invite-code" type="text" maxlength="16" placeholder="CÓDIGO DE INVITACIÓN" autocomplete="off" /><button class="button button-secondary" id="join-album" type="button">Unirme</button></span>
+              </label>
+            </div>
+          </div>
+          <div class="album-active" id="album-active" hidden>
+            <div class="album-active-info"><span class="album-name-value" id="active-album-name"></span><span>Comparte este código para invitar a otra persona</span></div>
+            <div class="album-code-actions"><code id="active-invite-code"></code><button class="button button-secondary" id="copy-invite" type="button">Copiar código</button><button class="text-button" id="leave-album" type="button">Cambiar álbum</button></div>
+          </div>
+          <p class="album-message" id="album-message" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="booth-layout" aria-label="Cabina fotográfica">
+          <div class="camera-column">
+            <div class="camera-pair">
+            <div class="camera-frame">
+              <div class="camera-chrome">
+                <span class="chrome-label">TU VISOR</span>
+                <span class="chrome-light" aria-hidden="true"></span>
+              </div>
+              <div class="camera-stage" id="camera-stage">
+                <video id="camera-video" autoplay muted playsinline aria-label="Vista previa de la cámara"></video>
+                <div class="welcome-card" id="welcome-card">
+                  <span class="welcome-icon" aria-hidden="true">◎</span>
+                  <h2>La cabina está lista</h2>
+                  <p>
+                    Cuando quieras empezar, activaremos tu cámara solo durante
+                    la sesión.
+                  </p>
+                  <button class="button button-primary" id="start-button" type="button">
+                    <span>Entrar en la cabina</span>
+                    <span aria-hidden="true">↗</span>
+                  </button>
+                </div>
+                <div class="countdown-overlay" id="countdown-overlay" aria-live="assertive"></div>
+                <div class="film-effect" id="film-effect" aria-hidden="true"></div>
+                <div class="live-badge" id="live-badge"><span class="status-dot" aria-hidden="true"></span> Cámara activa</div>
+                <div class="camera-grid" aria-hidden="true"></div>
+              </div>
+              <div class="camera-footer">
+                <span>PHOTOBOOTH / 001</span>
+                <span id="session-timer">00:00:00</span>
+              </div>
+            </div>
+
+            <div class="camera-frame partner-camera-frame" id="partner-camera-frame">
+              <div class="camera-chrome">
+                <span class="chrome-label">VISOR COMPARTIDO</span>
+                <span class="chrome-light" aria-hidden="true"></span>
+              </div>
+              <div class="camera-stage partner-camera-stage" id="partner-camera-stage">
+                <video id="partner-video" autoplay muted playsinline aria-label="Vista previa de la cámara de tu pareja"></video>
+                <div class="welcome-card partner-welcome" id="partner-welcome">
+                  <span class="welcome-icon" aria-hidden="true">◌</span>
+                  <h2>La otra cabina</h2>
+                  <p id="partner-note">Inicia sesión, abre el mismo álbum y solicita una vista privada.</p>
+                </div>
+                <div class="live-badge partner-live-badge" id="partner-live-badge"><span class="status-dot" aria-hidden="true"></span> Vista conectada</div>
+                <div class="camera-grid" aria-hidden="true"></div>
+              </div>
+              <div class="camera-footer">
+                <span id="partner-camera-label">ESPERANDO A TU PAREJA</span>
+                <span>WEBRTC · PRIVADO</span>
+              </div>
+            </div>
+            </div>
+
+            <div class="capture-controls" aria-label="Controles de captura">
+              <button class="icon-button" id="switch-camera-button" type="button" disabled aria-label="Cambiar cámara">
+                <span aria-hidden="true">↻</span>
+              </button>
+              <button class="shutter-button" id="capture-button" type="button" disabled aria-label="Hacer fotografía">
+                <span class="shutter-inner" aria-hidden="true"></span>
+              </button>
+              <button class="icon-button" id="timer-button" type="button" disabled aria-label="Activar cuenta atrás de 3 segundos" aria-pressed="false">
+                <span aria-hidden="true">◷</span>
+              </button>
+              <button class="icon-button power-button" id="stop-camera-button" type="button" disabled aria-label="Apagar cámara">
+                <span aria-hidden="true">⏻</span>
+              </button>
+            </div>
+            <p class="coming-soon" id="camera-note">Activa la cabina para habilitar los controles</p>
+
+            <section class="partner-call-panel" id="partner-call-panel" aria-labelledby="partner-call-title" hidden>
+              <div>
+                <p class="section-kicker">VISTA COMPARTIDA</p>
+                <h2 id="partner-call-title">Dos cámaras, un recuerdo</h2>
+              </div>
+              <div class="partner-call-actions">
+                <label class="partner-select-label" for="partner-select">Conectar con
+                  <select class="paper-select" id="partner-select" disabled>
+                    <option value="">Nadie conectado al álbum</option>
+                  </select>
+                </label>
+                <button class="button button-secondary" id="start-partner-call" type="button" disabled>Solicitar vista</button>
+                <button class="button button-secondary" id="end-partner-call" type="button" hidden>Finalizar vista</button>
+              </div>
+              <div class="incoming-call" id="incoming-call" hidden>
+                <span id="incoming-caller">Una persona quiere compartir su cámara.</span>
+                <div><button class="button button-primary" id="accept-incoming-call" type="button">Aceptar</button><button class="text-button" id="reject-incoming-call" type="button">Rechazar</button></div>
+              </div>
+              <p class="partner-call-status" id="partner-call-status" role="status" aria-live="polite"></p>
+            </section>
+          </div>
+
+          <aside class="tools-panel" aria-label="Herramientas de la sesión">
+            <div class="panel-section">
+              <div class="section-heading">
+                <div>
+                  <p class="section-kicker">01 / LOOK</p>
+                  <h2>Elige tu estilo</h2>
+                </div>
+                <span class="step-number">01</span>
+              </div>
+              <div class="choice-grid filter-grid" role="group" aria-label="Filtros">
+                <button class="choice-card is-selected" type="button" data-filter="original">
+                  <span class="filter-swatch swatch-original" aria-hidden="true"></span>
+                  <span>Original</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="mono">
+                  <span class="filter-swatch swatch-mono" aria-hidden="true"></span>
+                  <span>Blanco y negro</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="sepia">
+                  <span class="filter-swatch swatch-sepia" aria-hidden="true"></span>
+                  <span>Sepia</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="vintage">
+                  <span class="filter-swatch swatch-vintage" aria-hidden="true"></span>
+                  <span>Vintage</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="contrast">
+                  <span class="filter-swatch swatch-contrast" aria-hidden="true"></span>
+                  <span>Contraste</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="warm">
+                  <span class="filter-swatch swatch-warm" aria-hidden="true"></span>
+                  <span>Cálido</span>
+                </button>
+                <button class="choice-card" type="button" data-filter="cool">
+                  <span class="filter-swatch swatch-cool" aria-hidden="true"></span>
+                  <span>Frío</span>
+                </button>
+              </div>
+              <p class="selection-note" id="filter-note">Original seleccionado</p>
+            </div>
+
+            <div class="panel-divider" aria-hidden="true"></div>
+
+            <div class="panel-section">
+              <div class="section-heading">
+                <div>
+                  <p class="section-kicker">02 / FRAME</p>
+                  <h2>Elige tu formato</h2>
+                </div>
+                <span class="step-number">02</span>
+              </div>
+              <div class="layout-options" role="group" aria-label="Diseños de composición">
+                <button class="layout-card is-selected" type="button" data-layout="single">
+                  <span class="layout-preview layout-single" aria-hidden="true"><i></i></span>
+                  <span><strong>Una foto</strong><small>01 fotograma</small></span>
+                </button>
+                <button class="layout-card" type="button" data-layout="strip-3">
+                  <span class="layout-preview layout-strip-3" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span><strong>Tira corta</strong><small>03 fotogramas</small></span>
+                </button>
+                <button class="layout-card" type="button" data-layout="strip-4">
+                  <span class="layout-preview layout-strip-4" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                  <span><strong>Tira clásica</strong><small>04 fotogramas</small></span>
+                </button>
+                <button class="layout-card" type="button" data-layout="grid-2x2">
+                  <span class="layout-preview layout-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                  <span><strong>Cuadrícula</strong><small>02 × 02</small></span>
+                </button>
+              </div>
+              <p class="selection-note" id="layout-note">Una foto seleccionado</p>
+            </div>
+          </aside>
+        </section>
+
+        <section class="memory-section" aria-labelledby="memory-title">
+          <div class="section-heading memory-heading">
+            <div>
+              <p class="section-kicker">03 / MEMORIES</p>
+              <h2 id="memory-title">Tus fotografías</h2>
+            </div>
+            <span class="photo-count" id="photo-count">0 / 4</span>
+          </div>
+          <div class="memory-empty">
+            <div class="empty-film" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p>Aquí aparecerán tus fotografías</p>
+            <span>Elige un estilo y entra en la cabina para empezar.</span>
+          </div>
+          <div class="photo-gallery" id="photo-gallery" aria-live="polite"></div>
+        </section>
+
+        <section class="composition-section" aria-labelledby="composition-title">
+          <div>
+            <p class="section-kicker">04 / RESULT</p>
+            <h2 id="composition-title">Tu composición</h2>
+          </div>
+          <div class="composition-actions">
+            <label class="composition-hint" for="paper-color">Fondo
+              <select id="paper-color" class="paper-select">
+                <option value="#f1eee3">Marfil</option>
+                <option value="#ffffff">Blanco</option>
+                <option value="#d6f36b">Lima</option>
+                <option value="#252623">Carbón</option>
+                <option value="#e6c9bd">Rosa</option>
+              </select>
+            </label>
+            <button class="button button-secondary" id="generate-button" type="button" disabled>
+              Generar composición <span aria-hidden="true">→</span>
+            </button>
+            <a class="button button-primary download-button" id="download-composition" download="photobooth-tira.png" hidden>Guardar tira <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="composition-preview-wrap" id="composition-preview-wrap" hidden>
+            <img id="composition-preview" alt="Vista previa de la composición fotográfica" />
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>HECHO PARA GUARDAR LO BUENO</span>
+        <span>PHOTOBOOTH © 2026</span>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+      <div class="auth-dialog-header">
+        <div><p class="section-kicker">PHOTOBOOTH ACCOUNT</p><h2 id="auth-title">Entra en tu espacio</h2></div>
+        <button class="auth-close" id="auth-close" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <div class="auth-switch" role="group" aria-label="Acceso o registro">
+        <button class="is-active" id="show-login" type="button">Entrar</button>
+        <button id="show-signup" type="button">Crear cuenta</button>
+      </div>
+      <form id="auth-form">
+        <label class="auth-field" id="display-name-wrap" hidden>Nombre para mostrar<input id="display-name" type="text" maxlength="40" autocomplete="name" /></label>
+        <label class="auth-field">Correo electrónico<input id="auth-email" type="email" required autocomplete="email" /></label>
+        <label class="auth-field">Contraseña<input id="auth-password" type="password" required minlength="8" autocomplete="current-password" /></label>
+        <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        <button class="button button-primary auth-submit" id="auth-submit" type="submit">Entrar</button>
+      </form>
+      <p class="auth-footnote">Cada persona usa su propia cuenta. El código del álbum permite compartir únicamente sus fotografías.</p>
+    </dialog>
+  </body>
+</html>
