@@ -37,6 +37,13 @@ export class SharedCameraView {
 
   setPreviewState({ live = false, label = 'ESPERANDO A TU PAREJA', note = 'Inicia sesión, abre el mismo álbum y solicita una vista privada.' } = {}) {
     this.elements.stage.classList.toggle('is-live', live);
+    window.clearTimeout(this.curtainTimer);
+    this.elements.stage.classList.toggle('is-opening', live);
+    if (live) {
+      this.curtainTimer = window.setTimeout(() => {
+        this.elements.stage.classList.remove('is-opening');
+      }, 1150);
+    }
     this.elements.label.textContent = label;
     this.elements.note.textContent = note;
     if (!live) {

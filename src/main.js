@@ -1,6 +1,6 @@
 import { CameraController } from './camera.js';
 import { createComposition } from './compositor.js';
-import { applyVideoFilter, captureFilteredFrame } from './filters.js';
+import { applyVideoFilter, captureDuoFrame, captureFilteredFrame } from './filters.js';
 import { SharedCameraView } from './shared-camera-view.js';
 import { getSupabaseClient, PHOTO_BUCKET, SUPABASE_CONFIGURED } from './supabase-client.js';
 
@@ -13,8 +13,8 @@ const filterLabels = {
   warm: 'Cálido',
   cool: 'Frío',
 };
-const layoutLabels = { single: 'Una foto', 'strip-3': 'Tira corta', 'strip-4': 'Tira clásica', 'grid-2x2': 'Cuadrícula' };
-const layoutLimits = { single: 1, 'strip-3': 3, 'strip-4': 4, 'grid-2x2': 4 };
+const layoutLabels = { single: 'Una foto', duo: 'Dúo de cámaras', 'strip-3': 'Tira corta', 'strip-4': 'Tira clásica', 'grid-2x2': 'Cuadrícula' };
+const layoutLimits = { single: 1, duo: 1, 'strip-3': 3, 'strip-4': 4, 'grid-2x2': 4 };
 const state = { filter: 'original', layout: 'single', photos: [], timerEnabled: false, countdownToken: 0, user: null, album: null };
 
 const byId = (id) => document.getElementById(id);
@@ -23,6 +23,7 @@ const filterNote = byId('filter-note');
 const layoutNote = byId('layout-note');
 const cameraStage = byId('camera-stage');
 const cameraVideo = byId('camera-video');
+const partnerVideo = byId('partner-video');
 const startButton = byId('start-button');
 const cameraNote = byId('camera-note');
 const captureButton = byId('capture-button');
@@ -86,19 +87,18 @@ let albumChannel = null;
 const camera = new CameraController(cameraVideo, {
   onStatus(status) {
     const isActive = status === 'active';
-    cameraStage.classList.toggle('is-live', isActive);
-    cameraStage.classList.toggle('is-environment', camera.facingMode === 'environment');
+    window.dispatchEvent(new CustomEvent('photobooth:camera-status', {
+      detail: { status, facingMode: camera.facingMode },
+    }));
     [captureButton, timerButton, switchCameraButton, stopCameraButton].forEach((button) => {
       button.disabled = !isActive;
     });
     if (status === 'requesting') cameraNote.textContent = 'Solicitando permiso para usar la cámara…';
     if (status === 'active') {
       cameraNote.textContent = 'Cámara activa · lista para capturar';
-      startButton.innerHTML = '<span>Entrar en la cabina</span><span aria-hidden="true">↗</span>';
     }
     if (status === 'idle') {
       cameraNote.textContent = 'Cámara apagada · tus fotografías siguen guardadas';
-      startButton.innerHTML = '<span>Volver a encender</span><span aria-hidden="true">↗</span>';
     }
   },
 });
@@ -440,7 +440,12 @@ async function takePhoto() {
     countdownOverlay.textContent = '✦';
     playFilmAdvance();
     cameraStage.classList.add('is-flashing');
-    const src = captureFilteredFrame(cameraVideo, state.filter, camera.facingMode === 'user');
+    if (state.layout === 'duo' && partnerVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      throw new Error('Conecta primero la cámara de tu pareja para hacer una foto en formato dúo.');
+    }
+    const src = state.layout === 'duo'
+      ? captureDuoFrame(cameraVideo, partnerVideo, state.filter, camera.facingMode === 'user')
+      : captureFilteredFrame(cameraVideo, state.filter, camera.facingMode === 'user');
     const photo = { src, filter: state.filter, createdAt: new Date().toISOString(), shared: false };
     state.photos.push(photo);
     renderPhotos();
@@ -470,6 +475,7 @@ document.querySelectorAll('[data-filter]').forEach((button) => {
     state.filter = button.dataset.filter;
     selectOption('[data-filter]', 'filter', state.filter, filterNote, filterLabels);
     applyVideoFilter(cameraVideo, state.filter);
+    applyVideoFilter(partnerVideo, state.filter);
   });
 });
 
@@ -599,7 +605,14 @@ authForm.addEventListener('submit', async (event) => {
       showToast('Has iniciado sesión.');
     }
   } catch (error) {
-    setAuthFeedback(error.message || 'No se pudo completar el acceso.', true);
+    const message = error.message || 'No se pudo completar el acceso.';
+    const needsRedirectSetup = /redirect|not allowed|allow.?list/i.test(message);
+    setAuthFeedback(
+      needsRedirectSetup
+        ? `${message} Añade ${window.location.origin} en Supabase → Authentication → URL Configuration → Redirect URLs.`
+        : message,
+      true,
+    );
   } finally {
     authSubmit.disabled = false;
   }
@@ -698,5 +711,6 @@ window.addEventListener('pagehide', () => {
 selectOption('[data-filter]', 'filter', state.filter, filterNote, filterLabels);
 selectOption('[data-layout]', 'layout', state.layout, layoutNote, layoutLabels);
 applyVideoFilter(cameraVideo, state.filter);
+applyVideoFilter(partnerVideo, state.filter);
 renderPhotos();
 initializeSupabase();

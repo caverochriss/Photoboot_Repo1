@@ -14,9 +14,9 @@ export class CameraController {
     }
 
     this.stop();
-    this.onStatus?.('requesting');
 
     try {
+      this.onStatus?.('requesting');
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {

@@ -5,6 +5,7 @@ const GAP = 20;
 
 const layouts = {
   single: { columns: 1, rows: 1 },
+  duo: { columns: 1, rows: 1 },
   'strip-3': { columns: 1, rows: 3 },
   'strip-4': { columns: 1, rows: 4 },
   'grid-2x2': { columns: 2, rows: 2 },
@@ -32,11 +33,14 @@ function drawCover(context, image, x, y, width, height) {
 export async function createComposition(photos, layoutName, backgroundColor) {
   if (!photos.length) throw new Error('Haz al menos una fotografía antes de generar la tira.');
   const layout = layouts[layoutName] ?? layouts.single;
+  const isDuo = layoutName === 'duo';
+  const photoWidth = isDuo ? PHOTO_WIDTH * 2 : PHOTO_WIDTH;
+  const photoHeight = isDuo ? PHOTO_WIDTH : PHOTO_HEIGHT;
   const columns = layoutName === 'grid-2x2' ? Math.min(2, photos.length) : layout.columns;
   const rows = layoutName === 'grid-2x2' ? Math.ceil(photos.length / 2) : Math.min(layout.rows, photos.length);
   const canvas = document.createElement('canvas');
-  canvas.width = MARGIN * 2 + columns * PHOTO_WIDTH + (columns - 1) * GAP;
-  canvas.height = MARGIN * 2 + rows * PHOTO_HEIGHT + (rows - 1) * GAP + 48;
+  canvas.width = MARGIN * 2 + columns * photoWidth + (columns - 1) * GAP;
+  canvas.height = MARGIN * 2 + rows * photoHeight + (rows - 1) * GAP + 48;
 
   const context = canvas.getContext('2d');
   context.fillStyle = backgroundColor;
@@ -48,11 +52,11 @@ export async function createComposition(photos, layoutName, backgroundColor) {
   images.forEach((image, index) => {
     const column = layoutName === 'grid-2x2' ? index % 2 : 0;
     const row = layoutName === 'grid-2x2' ? Math.floor(index / 2) : index;
-    const x = MARGIN + column * (PHOTO_WIDTH + GAP);
-    const y = MARGIN + row * (PHOTO_HEIGHT + GAP);
+    const x = MARGIN + column * (photoWidth + GAP);
+    const y = MARGIN + row * (photoHeight + GAP);
     context.fillStyle = 'rgba(30, 30, 25, 0.12)';
-    context.fillRect(x - 5, y - 5, PHOTO_WIDTH + 10, PHOTO_HEIGHT + 10);
-    drawCover(context, image, x, y, PHOTO_WIDTH, PHOTO_HEIGHT);
+    context.fillRect(x - 5, y - 5, photoWidth + 10, photoHeight + 10);
+    drawCover(context, image, x, y, photoWidth, photoHeight);
   });
 
   context.fillStyle = backgroundColor === '#252623' ? '#e9e7dc' : '#282a25';

@@ -1,0 +1,105 @@
+/* La vista en vivo adopta la geometría del formato final elegido. */
+.layout-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.camera-pair .partner-camera-frame {
+  border-left: 0;
+}
+
+/* Cada visor conserva un encuadre cuadrado; el dúo forma una foto 2:1. */
+.camera-stage {
+  aspect-ratio: 1 / 1;
+}
+
+.camera-pair {
+  gap: 0.5px;
+}
+
+.live-composition[data-layout="strip-3"],
+.live-composition[data-layout="strip-4"] {
+  width: min(100%, 540px);
+}
+
+.layout-duo {
+  gap: 1px;
+  padding: 5px 10px;
+}
+
+.layout-duo i {
+  width: 50%;
+  background: #8eb3e1;
+}
+
+.live-composition[data-layout="duo"] .camera-pair {
+  width: min(100%, 720px);
+  margin-inline: auto;
+  gap: 0.5px;
+}
+
+.live-composition[data-layout="duo"] .camera-stage {
+  aspect-ratio: 1 / 1;
+}
+
+.live-composition[data-layout="strip-3"] .camera-pair,
+.live-composition[data-layout="strip-4"] .camera-pair {
+  width: 50%;
+  margin-inline: auto;
+}
+
+.live-composition[data-layout="strip-3"] .preview-placeholders,
+.live-composition[data-layout="strip-4"] .preview-placeholders {
+  width: 50%;
+  margin-inline: auto;
+  flex-direction: column;
+}
+
+.live-composition[data-layout="strip-3"] .preview-placeholder,
+.live-composition[data-layout="strip-4"] .preview-placeholder {
+  aspect-ratio: 2 / 3;
+}
+
+.live-composition[data-layout="grid-2x2"] {
+  display: grid;
+  width: min(100%, 620px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #b9c9dc;
+  border-radius: 14px;
+  background: #b9c9dc;
+  box-shadow: 0 18px 52px #20344d18;
+}
+
+.live-composition[data-layout="grid-2x2"] .camera-pair,
+.live-composition[data-layout="grid-2x2"] .preview-placeholders {
+  display: contents;
+}
+
+.live-composition[data-layout="grid-2x2"] .camera-pair .camera-frame {
+  padding: 8px;
+}
+
+.live-composition[data-layout="grid-2x2"] .camera-stage,
+.live-composition[data-layout="grid-2x2"] .preview-placeholder {
+  aspect-ratio: 1;
+}
+
+.live-composition[data-layout="grid-2x2"] .preview-placeholder {
+  border: 0;
+  border-radius: 0;
+}
+
+.live-composition[data-layout="grid-2x2"] .camera-pair .camera-chrome,
+.live-composition[data-layout="grid-2x2"] .camera-pair .camera-footer {
+  font-size: clamp(.38rem, .8vw, .55rem);
+}
+
+@media (max-width: 560px) {
+  .live-composition[data-layout="strip-3"] .camera-pair,
+  .live-composition[data-layout="strip-3"] .preview-placeholders,
+  .live-composition[data-layout="strip-4"] .camera-pair,
+  .live-composition[data-layout="strip-4"] .preview-placeholders {
+    width: 68%;
+  }
+}

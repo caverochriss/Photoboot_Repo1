@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#141514" />
+    <meta name="theme-color" content="#f6f8fb" />
     <meta
       name="description"
       content="PhotoBooth: una cabina fotográfica retro para crear recuerdos únicos."
     />
     <title>PhotoBooth — Tu momento, en tira</title>
     <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="src/main.js"></script>
+    <script type="module" src="/src/entry.jsx"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -64,58 +64,7 @@
 
         <section class="booth-layout" aria-label="Cabina fotográfica">
           <div class="camera-column">
-            <div class="camera-pair">
-            <div class="camera-frame">
-              <div class="camera-chrome">
-                <span class="chrome-label">TU VISOR</span>
-                <span class="chrome-light" aria-hidden="true"></span>
-              </div>
-              <div class="camera-stage" id="camera-stage">
-                <video id="camera-video" autoplay muted playsinline aria-label="Vista previa de la cámara"></video>
-                <div class="welcome-card" id="welcome-card">
-                  <span class="welcome-icon" aria-hidden="true">◎</span>
-                  <h2>La cabina está lista</h2>
-                  <p>
-                    Cuando quieras empezar, activaremos tu cámara solo durante
-                    la sesión.
-                  </p>
-                  <button class="button button-primary" id="start-button" type="button">
-                    <span>Entrar en la cabina</span>
-                    <span aria-hidden="true">↗</span>
-                  </button>
-                </div>
-                <div class="countdown-overlay" id="countdown-overlay" aria-live="assertive"></div>
-                <div class="film-effect" id="film-effect" aria-hidden="true"></div>
-                <div class="live-badge" id="live-badge"><span class="status-dot" aria-hidden="true"></span> Cámara activa</div>
-                <div class="camera-grid" aria-hidden="true"></div>
-              </div>
-              <div class="camera-footer">
-                <span>PHOTOBOOTH / 001</span>
-                <span id="session-timer">00:00:00</span>
-              </div>
-            </div>
-
-            <div class="camera-frame partner-camera-frame" id="partner-camera-frame">
-              <div class="camera-chrome">
-                <span class="chrome-label">VISOR COMPARTIDO</span>
-                <span class="chrome-light" aria-hidden="true"></span>
-              </div>
-              <div class="camera-stage partner-camera-stage" id="partner-camera-stage">
-                <video id="partner-video" autoplay muted playsinline aria-label="Vista previa de la cámara de tu pareja"></video>
-                <div class="welcome-card partner-welcome" id="partner-welcome">
-                  <span class="welcome-icon" aria-hidden="true">◌</span>
-                  <h2>La otra cabina</h2>
-                  <p id="partner-note">Inicia sesión, abre el mismo álbum y solicita una vista privada.</p>
-                </div>
-                <div class="live-badge partner-live-badge" id="partner-live-badge"><span class="status-dot" aria-hidden="true"></span> Vista conectada</div>
-                <div class="camera-grid" aria-hidden="true"></div>
-              </div>
-              <div class="camera-footer">
-                <span id="partner-camera-label">ESPERANDO A TU PAREJA</span>
-                <span>WEBRTC · PRIVADO</span>
-              </div>
-            </div>
-            </div>
+            <div id="react-camera-preview"></div>
 
             <div class="capture-controls" aria-label="Controles de captura">
               <button class="icon-button" id="switch-camera-button" type="button" disabled aria-label="Cambiar cámara">
@@ -211,6 +160,10 @@
                 <button class="layout-card is-selected" type="button" data-layout="single">
                   <span class="layout-preview layout-single" aria-hidden="true"><i></i></span>
                   <span><strong>Una foto</strong><small>01 fotograma</small></span>
+                </button>
+                <button class="layout-card" type="button" data-layout="duo">
+                  <span class="layout-preview layout-duo" aria-hidden="true"><i></i><i></i></span>
+                  <span><strong>Dúo de cámaras</strong><small>Ambas lado a lado</small></span>
                 </button>
                 <button class="layout-card" type="button" data-layout="strip-3">
                   <span class="layout-preview layout-strip-3" aria-hidden="true"><i></i><i></i><i></i></span>
